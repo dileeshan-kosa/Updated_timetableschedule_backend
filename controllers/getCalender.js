@@ -17,9 +17,31 @@ const calenderCtrl = {
         end_time,
         year,
       } = req.body;
-      // const existingOne = await calenderTable.findOne({});
 
-      // if (existingOne) return res.status(400).json({ msg: "it's existing." });
+      // Convert start and end time to 24-hour format for comparison (optional)
+      const startTime = new Date(`${lecture_date} ${start_time}`);
+      const endTime = new Date(`${lecture_date} ${end_time}`);
+
+      // Check for existing timetable conflicts
+      const existingConflict = await calenderTable.findOne({
+        faculty,
+        department,
+        lecture_date,
+        $or: [
+          {
+            // Overlapping condition
+            $and: [
+              { start_time: { $lt: end_time } },
+              { end_time: { $gt: start_time } },
+            ],
+          },
+        ],
+      });
+      if (existingConflict) {
+        return res.status(400).json({
+          message: `A timetable already exists for ${department} - ${batch} on ${lecture_date} during this time.`,
+        });
+      }
 
       // const newData = new calenderTable({ faculty_name });
       const newData = new calenderTable({
