@@ -24,8 +24,8 @@ const calenderCtrl = {
 
       // Check for existing timetable conflicts
       const existingConflict = await calenderTable.findOne({
-        faculty,
-        department,
+        modulename, 
+        batch,
         lecture_date,
         $or: [
           {
